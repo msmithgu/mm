@@ -33,9 +33,20 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model 5 1 [ White, Black, Red, Green, Blue, Yellow ]
+    ( Model 5 1 allColors
     , Cmd.none
     )
+
+
+allColors : List Color
+allColors =
+    [ White
+    , Black
+    , Red
+    , Green
+    , Blue
+    , Yellow
+    ]
 
 
 type Color
