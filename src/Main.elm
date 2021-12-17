@@ -29,13 +29,12 @@ type alias Model =
     { totalTurns : Int
     , currentTurn : Int
     , secret : List Color
-    , randomColor : Color
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model 5 1 allColors White
+    ( Model 5 1 allWhite
     , Cmd.none
     )
 
@@ -48,6 +47,17 @@ allColors =
     , Green
     , Blue
     , Yellow
+    ]
+
+
+allWhite : List Color
+allWhite =
+    [ White
+    , White
+    , White
+    , White
+    , White
+    , White
     ]
 
 
@@ -88,8 +98,8 @@ colorText c =
 
 type Msg
     = NextTurn
-    | NewColor
-    | SetColor Color
+    | NewGame
+    | SetSecret (List Color)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -100,15 +110,20 @@ update msg model =
             , Cmd.none
             )
 
-        NewColor ->
+        NewGame ->
             ( model
-            , Random.generate SetColor colorGenerator
+            , Random.generate SetSecret (colorListGenerator 5)
             )
 
-        SetColor c ->
-            ( { model | randomColor = c }
+        SetSecret cl ->
+            ( { model | secret = cl }
             , Cmd.none
             )
+
+
+colorListGenerator : Int -> Random.Generator (List Color)
+colorListGenerator n =
+    Random.list n colorGenerator
 
 
 colorGenerator : Random.Generator Color
@@ -161,10 +176,9 @@ view model =
             [ div [] [ text "# debug" ]
             , div [] [ text ("currentTurn: " ++ String.fromInt model.currentTurn) ]
             ]
-        , showColor model.randomColor
         , div [] (List.map showColor model.secret)
         , button [ onClick NextTurn ] [ text "Next Turn" ]
-        , button [ onClick NewColor ] [ text "New Color" ]
+        , button [ onClick NewGame ] [ text "New Game" ]
         ]
 
 
