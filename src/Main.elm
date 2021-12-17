@@ -27,14 +27,46 @@ main =
 type alias Model =
     { totalTurns : Int
     , currentTurn : Int
+    , secret : List Color
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model 5 1
+    ( Model 5 1 [ White, Black, Red, Green, Blue, Yellow ]
     , Cmd.none
     )
+
+
+type Color
+    = Red
+    | Green
+    | Blue
+    | Yellow
+    | White
+    | Black
+
+
+colorText : Color -> String
+colorText c =
+    case c of
+        Red ->
+            "red"
+
+        Green ->
+            "green"
+
+        Blue ->
+            "blue"
+
+        Yellow ->
+            "yellow"
+
+        White ->
+            "white"
+
+        Black ->
+            "black"
 
 
 
@@ -79,7 +111,34 @@ view model =
         , style "flex-direction" "column"
         , style "justify-content" "center"
         , style "align-items" "center"
+        , style "font-family" "sans-serif"
         ]
-        [ span [] [ text (String.fromInt model.currentTurn) ]
+        [ h1 [] [ text "MM" ]
+        , div
+            [ style "border" "1px dashed #0f0"
+            , style "margin" "1em"
+            , style "padding" "0.5em 1em"
+            , style "background" "black"
+            , style "color" "#0f0"
+            , style "font-family" "monospace"
+            ]
+            [ div [] [ text "# debug" ]
+            , div [] [ text ("currentTurn: " ++ String.fromInt model.currentTurn) ]
+            ]
+        , div [] (List.map showColor model.secret)
         , button [ onClick NextTurn ] [ text "Next Turn" ]
         ]
+
+
+showColor : Color -> Html msg
+showColor c =
+    div
+        [ style "display" "inline-block"
+        , style "width" "1em"
+        , style "height" "1em"
+        , style "border" "1px solid black"
+        , style "border-radius" "1em"
+        , style "background" (colorText c)
+        , style "margin" "0.5em"
+        ]
+        []
