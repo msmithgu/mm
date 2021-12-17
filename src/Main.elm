@@ -4,6 +4,7 @@ import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Random
 
 
 
@@ -28,12 +29,13 @@ type alias Model =
     { totalTurns : Int
     , currentTurn : Int
     , secret : List Color
+    , randomColor : Color
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model 5 1 allColors
+    ( Model 5 1 allColors White
     , Cmd.none
     )
 
@@ -86,6 +88,8 @@ colorText c =
 
 type Msg
     = NextTurn
+    | NewColor
+    | SetColor Color
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -95,6 +99,27 @@ update msg model =
             ( { model | currentTurn = model.currentTurn + 1 }
             , Cmd.none
             )
+
+        NewColor ->
+            ( model
+            , Random.generate SetColor colorGenerator
+            )
+
+        SetColor c ->
+            ( { model | randomColor = c }
+            , Cmd.none
+            )
+
+
+colorGenerator : Random.Generator Color
+colorGenerator =
+    Random.uniform White
+        [ Black
+        , Red
+        , Green
+        , Blue
+        , Yellow
+        ]
 
 
 
@@ -136,8 +161,10 @@ view model =
             [ div [] [ text "# debug" ]
             , div [] [ text ("currentTurn: " ++ String.fromInt model.currentTurn) ]
             ]
+        , showColor model.randomColor
         , div [] (List.map showColor model.secret)
         , button [ onClick NextTurn ] [ text "Next Turn" ]
+        , button [ onClick NewColor ] [ text "New Color" ]
         ]
 
 
