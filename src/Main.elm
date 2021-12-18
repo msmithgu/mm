@@ -35,7 +35,7 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model 5 1 (List.repeat 5 White) -1
+    ( Model 5 1 (List.repeat 4 White) -1
     , Cmd.none
     )
 
@@ -103,7 +103,7 @@ update msg model =
 
         NewGame ->
             ( model
-            , Random.generate SetSecret (colorListGenerator 5)
+            , Random.generate SetSecret (colorListGenerator 4)
             )
 
         SetSecret cl ->
