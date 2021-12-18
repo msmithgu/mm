@@ -29,12 +29,13 @@ type alias Model =
     { totalTurns : Int
     , currentTurn : Int
     , secret : List Color
+    , selectedIndex : Int
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model 5 1 allWhite
+    ( Model 5 1 (List.repeat 5 White) -1
     , Cmd.none
     )
 
@@ -47,17 +48,6 @@ allColors =
     , Green
     , Blue
     , Yellow
-    ]
-
-
-allWhite : List Color
-allWhite =
-    [ White
-    , White
-    , White
-    , White
-    , White
-    , White
     ]
 
 
@@ -100,6 +90,7 @@ type Msg
     = NextTurn
     | NewGame
     | SetSecret (List Color)
+    | SelectIndex Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -117,6 +108,11 @@ update msg model =
 
         SetSecret cl ->
             ( { model | secret = cl }
+            , Cmd.none
+            )
+
+        SelectIndex i ->
+            ( { model | selectedIndex = i }
             , Cmd.none
             )
 
@@ -175,17 +171,42 @@ view model =
             ]
             [ div [] [ text "# debug" ]
             , div [] [ text ("currentTurn: " ++ String.fromInt model.currentTurn) ]
+            , div [] [ text ("selectedIndex: " ++ String.fromInt model.selectedIndex) ]
             ]
-        , div [] (List.map showColor model.secret)
+        , div [] (List.indexedMap (showIndexedColor model.selectedIndex) model.secret)
         , button [ onClick NextTurn ] [ text "Next Turn" ]
         , button [ onClick NewGame ] [ text "New Game" ]
+        ]
+
+
+showIndexedColor : Int -> Int -> Color -> Html Msg
+showIndexedColor si i c =
+    div
+        [ style "display" "inline-block"
+        , style "padding" "0.5em"
+        , style "margin-bottom" "1em"
+        , style "text-align" "center"
+        , onClick (SelectIndex i)
+        ]
+        [ showColor c
+        , text (String.fromInt i)
+        , div
+            []
+            [ text
+                (if si == i then
+                    "*"
+
+                 else
+                    "-"
+                )
+            ]
         ]
 
 
 showColor : Color -> Html msg
 showColor c =
     div
-        [ style "display" "inline-block"
+        [ style "display" "block"
         , style "width" "1em"
         , style "height" "1em"
         , style "border" "1px solid black"
