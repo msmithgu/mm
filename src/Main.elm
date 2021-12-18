@@ -26,18 +26,23 @@ main =
 
 
 type alias Model =
-    { totalTurns : Int
-    , currentTurn : Int
-    , secret : List Color
+    { secret : Cypher
+    , guesses : List Cypher
+    , currentGuess : Int
     , selectedIndex : Int
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model 5 1 (List.repeat 4 White) -1
+    ( Model blankCypher (List.repeat 6 blankCypher) 0 -1
     , Cmd.none
     )
+
+
+blankCypher : Cypher
+blankCypher =
+    List.repeat 4 White
 
 
 allColors : List Color
@@ -58,6 +63,10 @@ type Color
     | Yellow
     | White
     | Black
+
+
+type alias Cypher =
+    List Color
 
 
 colorText : Color -> String
@@ -87,7 +96,7 @@ colorText c =
 
 
 type Msg
-    = NextTurn
+    = NextGuess
     | NewGame
     | SetSecret (List Color)
     | SelectIndex Int
@@ -96,8 +105,8 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NextTurn ->
-            ( { model | currentTurn = model.currentTurn + 1 }
+        NextGuess ->
+            ( { model | currentGuess = model.currentGuess + 1 }
             , Cmd.none
             )
 
@@ -152,7 +161,7 @@ view model =
         [ style "border" "6px dashed purple"
         , style "border-radius" "20px"
         , style "width" "480px"
-        , style "margin" "100px auto"
+        , style "margin" "40px auto"
         , style "padding" "40px"
         , style "display" "flex"
         , style "flex-direction" "column"
@@ -170,46 +179,90 @@ view model =
             , style "font-family" "monospace"
             ]
             [ div [] [ text "# debug" ]
-            , div [] [ text ("currentTurn: " ++ String.fromInt model.currentTurn) ]
+            , div [] [ text ("currentGuess: " ++ String.fromInt model.currentGuess) ]
             , div [] [ text ("selectedIndex: " ++ String.fromInt model.selectedIndex) ]
             ]
-        , div [] (List.indexedMap (showIndexedColor model.selectedIndex) model.secret)
-        , button [ onClick NextTurn ] [ text "Next Turn" ]
-        , button [ onClick NewGame ] [ text "New Game" ]
-        ]
-
-
-showIndexedColor : Int -> Int -> Color -> Html Msg
-showIndexedColor si i c =
-    div
-        [ style "display" "inline-block"
-        , style "padding" "0.5em"
-        , style "margin-bottom" "1em"
-        , style "text-align" "center"
-        , onClick (SelectIndex i)
-        ]
-        [ showColor c
-        , text (String.fromInt i)
-        , div
-            []
-            [ text
-                (if si == i then
-                    "*"
-
-                 else
-                    "-"
-                )
+        , div [] (List.map showColor model.secret)
+        , showGuesses model
+        , div []
+            [ button
+                [ onClick NextGuess ]
+                [ text "Next Turn" ]
+            , button
+                [ onClick NewGame ]
+                [ text "New Game" ]
             ]
         ]
+
+
+showGuesses : Model -> Html Msg
+showGuesses model =
+    div [] (List.indexedMap (showIndexedGuess model.currentGuess model.selectedIndex) model.guesses)
+
+
+showIndexedGuess : Int -> Int -> Int -> Cypher -> Html Msg
+showIndexedGuess selectedGuess selectedIndex guessIndex guess =
+    div
+        [ style "border" "1px solid transparent"
+        , style "border-color"
+            (if guessIndex == selectedGuess then
+                "black"
+
+             else
+                "transparent"
+            )
+        ]
+        (List.indexedMap
+            (showIndexedColor
+                (guessIndex == selectedGuess)
+                (if guessIndex == selectedGuess then
+                    selectedIndex
+
+                 else
+                    -1
+                )
+            )
+            guess
+        )
+
+
+showIndexedColor : Bool -> Int -> Int -> Color -> Html Msg
+showIndexedColor clickable si i c =
+    div
+        [ style "display" "inline-block"
+        , style "border" "1px solid transparent"
+        , style "border-color"
+            (if si == i then
+                "black"
+
+             else
+                "transparent"
+            )
+        , style "padding" "0.5em"
+        , style "text-align" "center"
+        , style "cursor"
+            (if clickable then
+                "pointer"
+
+             else
+                "inherit"
+            )
+        , if clickable then
+            onClick (SelectIndex i)
+
+          else
+            style "opacity" "0.8"
+        ]
+        [ showColor c ]
 
 
 showColor : Color -> Html msg
 showColor c =
     div
-        [ style "display" "block"
+        [ style "display" "inline-block"
         , style "width" "1em"
         , style "height" "1em"
-        , style "border" "1px solid black"
+        , style "border" "2px solid black"
         , style "border-radius" "1em"
         , style "background" (colorText c)
         , style "margin" "0.5em"
