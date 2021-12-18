@@ -203,7 +203,8 @@ showGuesses model =
 showIndexedGuess : Int -> Int -> Int -> Cypher -> Html Msg
 showIndexedGuess selectedGuess selectedIndex guessIndex guess =
     div
-        [ style "border" "1px solid transparent"
+        [ style "border-left" "4px solid transparent"
+        , style "border-right" "4px solid transparent"
         , style "border-color"
             (if guessIndex == selectedGuess then
                 "black"
