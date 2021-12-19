@@ -225,20 +225,23 @@ view model =
 
 showGuesses : Model -> Html Msg
 showGuesses model =
-    div [] (List.indexedMap (showIndexedGuess 0 model.selectedIndex) model.guesses)
+    div [] (List.indexedMap (showIndexedGuess model) model.guesses)
 
 
-showIndexedGuess : Int -> Int -> Int -> Cypher -> Html Msg
-showIndexedGuess selectedGuess selectedIndex guessIndex guess =
+showIndexedGuess : Model -> Int -> Cypher -> Html Msg
+showIndexedGuess model guessIndex guess =
     div
         [ style "display" "flex"
         , style "flex-direction" "row"
         ]
         [ div
+            [ style "margin" "0.5em" ]
+            [ text (String.fromInt (List.length model.guesses - guessIndex)) ]
+        , div
             [ style "border-left" "4px solid transparent"
             , style "border-right" "4px solid transparent"
             , style "border-color"
-                (if guessIndex == selectedGuess then
+                (if guessIndex == 0 then
                     "black"
 
                  else
@@ -247,9 +250,9 @@ showIndexedGuess selectedGuess selectedIndex guessIndex guess =
             ]
             (List.indexedMap
                 (showIndexedColor
-                    (guessIndex == selectedGuess)
-                    (if guessIndex == selectedGuess then
-                        selectedIndex
+                    (guessIndex == 0)
+                    (if guessIndex == 0 then
+                        model.selectedIndex
 
                      else
                         -1
@@ -259,15 +262,20 @@ showIndexedGuess selectedGuess selectedIndex guessIndex guess =
             )
         , div
             [ style "margin" "0.5em" ]
-            [ if guessIndex == selectedGuess then
+            [ if guessIndex == 0 then
                 button
                     [ onClick NextGuess ]
                     [ text "Lock" ]
 
               else
-                text "TBD"
+                gradeGuess model.secret guess
             ]
         ]
+
+
+gradeGuess : Cypher -> Cypher -> Html Msg
+gradeGuess secret guess =
+    text "TBD"
 
 
 showIndexedColor : Bool -> Int -> Int -> Color -> Html Msg
