@@ -56,6 +56,15 @@ allColors =
     ]
 
 
+choosableColors : List Color
+choosableColors =
+    [ Red
+    , Green
+    , Blue
+    , Yellow
+    ]
+
+
 type Color
     = Red
     | Green
@@ -100,6 +109,7 @@ type Msg
     | NewGame
     | SetSecret (List Color)
     | SelectIndex Int
+    | UpdateColor Color
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -124,6 +134,37 @@ update msg model =
             ( { model | selectedIndex = i }
             , Cmd.none
             )
+
+        UpdateColor col ->
+            ( { model | selectedIndex = -1, guesses = updateGuess model.guesses model.currentGuess model.selectedIndex col }
+            , Cmd.none
+            )
+
+
+updateGuess : List Cypher -> Int -> Int -> Color -> List Cypher
+updateGuess guessList selectedGuessIndex selectedColorIndex col =
+    let
+        guessUpdate i guess =
+            if i == selectedGuessIndex then
+                updateCypher guess col selectedColorIndex
+
+            else
+                guess
+    in
+    List.indexedMap guessUpdate guessList
+
+
+updateCypher : Cypher -> Color -> Int -> Cypher
+updateCypher cyph colorToUpdate selectedIndex =
+    let
+        colorUpdate i col =
+            if i == selectedIndex then
+                colorToUpdate
+
+            else
+                col
+    in
+    List.indexedMap colorUpdate cyph
 
 
 colorListGenerator : Int -> Random.Generator (List Color)
@@ -170,6 +211,7 @@ view model =
         , style "font-family" "sans-serif"
         ]
         [ h1 [] [ text "MM" ]
+        , div [] (List.map showColor model.secret)
         , div
             [ style "border" "1px dashed #0f0"
             , style "margin" "1em"
@@ -182,7 +224,7 @@ view model =
             , div [] [ text ("currentGuess: " ++ String.fromInt model.currentGuess) ]
             , div [] [ text ("selectedIndex: " ++ String.fromInt model.selectedIndex) ]
             ]
-        , div [] (List.map showColor model.secret)
+        , showColorPicker
         , showGuesses model
         , div []
             [ button
@@ -228,18 +270,18 @@ showIndexedGuess selectedGuess selectedIndex guessIndex guess =
 
 
 showIndexedColor : Bool -> Int -> Int -> Color -> Html Msg
-showIndexedColor clickable si i c =
+showIndexedColor clickable selectedIndex i c =
     div
         [ style "display" "inline-block"
+        , style "position" "relative"
         , style "border" "1px solid transparent"
         , style "border-color"
-            (if si == i then
+            (if i == selectedIndex then
                 "black"
 
              else
                 "transparent"
             )
-        , style "padding" "0.5em"
         , style "text-align" "center"
         , style "cursor"
             (if clickable then
@@ -252,7 +294,7 @@ showIndexedColor clickable si i c =
             onClick (SelectIndex i)
 
           else
-            style "opacity" "0.8"
+            style "opacity" "0.5"
         ]
         [ showColor c ]
 
@@ -269,3 +311,28 @@ showColor c =
         , style "margin" "0.5em"
         ]
         []
+
+
+showPickableColor : Color -> Html Msg
+showPickableColor c =
+    div
+        [ style "display" "inline-block"
+        , style "width" "1.25em"
+        , style "height" "1.25em"
+        , style "border" "2px solid black"
+        , style "border-radius" "1em"
+        , style "background" (colorText c)
+        , style "margin" "0.5em"
+        , onClick (UpdateColor c)
+        ]
+        []
+
+
+showColorPicker : Html Msg
+showColorPicker =
+    div
+        [ style "display" "block"
+        , style "border" "1px solid black"
+        , style "margin-bottom" "1em"
+        ]
+        (List.map showPickableColor choosableColors)
