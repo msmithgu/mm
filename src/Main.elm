@@ -4,6 +4,7 @@ import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import List.Extra exposing (zip)
 import Random
 
 
@@ -95,7 +96,7 @@ colorText c =
 
 
 type Msg
-    = NextGuess
+    = CheckGuess
     | NewGame
     | SetSecret (List Color)
     | SelectIndex Int
@@ -105,7 +106,7 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NextGuess ->
+        CheckGuess ->
             ( { model | guesses = blankCypher :: model.guesses }
             , Cmd.none
             )
@@ -262,19 +263,31 @@ showIndexedGuess model guessIndex guess =
             )
         , div
             [ style "margin" "0.5em" ]
-            [ if guessIndex == 0 then
-                button
-                    [ onClick NextGuess ]
-                    [ text "Lock" ]
-
-              else
-                gradeGuess model.secret guess
-            ]
+            [ showGuessStatus model guessIndex guess ]
         ]
 
 
-gradeGuess : Cypher -> Cypher -> Html Msg
-gradeGuess secret guess =
+showGuessStatus : Model -> Int -> Cypher -> Html Msg
+showGuessStatus model guessIndex guess =
+    if guessIndex == 0 then
+        button
+            [ onClick CheckGuess ]
+            [ text "Lock" ]
+
+    else if List.Extra.isPrefixOf model.secret guess then
+        text "Correct!"
+
+    else
+        showGradeGuess model.secret guess
+
+
+listEqual : List a -> List a -> Bool
+listEqual =
+    List.Extra.isPrefixOf
+
+
+showGradeGuess : Cypher -> Cypher -> Html Msg
+showGradeGuess secret guess =
     text "TBD"
 
 
