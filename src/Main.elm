@@ -55,15 +55,6 @@ allColors =
     ]
 
 
-choosableColors : List Color
-choosableColors =
-    [ Red
-    , Green
-    , Blue
-    , Yellow
-    ]
-
-
 type Color
     = Red
     | Green
@@ -224,9 +215,6 @@ view model =
             ]
         , div [ style "margin" "1em" ]
             [ button
-                [ onClick NextGuess ]
-                [ text "Next Turn" ]
-            , button
                 [ onClick NewGame ]
                 [ text "New Game" ]
             ]
@@ -243,28 +231,43 @@ showGuesses model =
 showIndexedGuess : Int -> Int -> Int -> Cypher -> Html Msg
 showIndexedGuess selectedGuess selectedIndex guessIndex guess =
     div
-        [ style "border-left" "4px solid transparent"
-        , style "border-right" "4px solid transparent"
-        , style "border-color"
-            (if guessIndex == selectedGuess then
-                "black"
-
-             else
-                "transparent"
-            )
+        [ style "display" "flex"
+        , style "flex-direction" "row"
         ]
-        (List.indexedMap
-            (showIndexedColor
-                (guessIndex == selectedGuess)
+        [ div
+            [ style "border-left" "4px solid transparent"
+            , style "border-right" "4px solid transparent"
+            , style "border-color"
                 (if guessIndex == selectedGuess then
-                    selectedIndex
+                    "black"
 
                  else
-                    -1
+                    "transparent"
                 )
+            ]
+            (List.indexedMap
+                (showIndexedColor
+                    (guessIndex == selectedGuess)
+                    (if guessIndex == selectedGuess then
+                        selectedIndex
+
+                     else
+                        -1
+                    )
+                )
+                guess
             )
-            guess
-        )
+        , div
+            [ style "margin" "0.5em" ]
+            [ if guessIndex == selectedGuess then
+                button
+                    [ onClick NextGuess ]
+                    [ text "Lock" ]
+
+              else
+                text "TBD"
+            ]
+        ]
 
 
 showIndexedColor : Bool -> Int -> Int -> Color -> Html Msg
@@ -333,4 +336,4 @@ showColorPicker =
         , style "border" "1px solid black"
         , style "margin-bottom" "1em"
         ]
-        (List.map showPickableColor choosableColors)
+        (List.map showPickableColor allColors)
