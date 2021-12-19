@@ -28,14 +28,13 @@ main =
 type alias Model =
     { secret : Cypher
     , guesses : List Cypher
-    , currentGuess : Int
     , selectedIndex : Int
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model blankCypher (List.repeat 6 blankCypher) 0 -1
+    ( Model blankCypher [ blankCypher ] -1
     , Cmd.none
     )
 
@@ -116,12 +115,12 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         NextGuess ->
-            ( { model | currentGuess = model.currentGuess + 1 }
+            ( { model | guesses = blankCypher :: model.guesses }
             , Cmd.none
             )
 
         NewGame ->
-            ( model
+            ( { model | guesses = [ blankCypher ] }
             , Random.generate SetSecret (colorListGenerator 4)
             )
 
@@ -136,7 +135,7 @@ update msg model =
             )
 
         UpdateColor col ->
-            ( { model | selectedIndex = -1, guesses = updateGuess model.guesses model.currentGuess model.selectedIndex col }
+            ( { model | selectedIndex = -1, guesses = updateGuess model.guesses 0 model.selectedIndex col }
             , Cmd.none
             )
 
@@ -221,12 +220,9 @@ view model =
             , style "font-family" "monospace"
             ]
             [ div [] [ text "# debug" ]
-            , div [] [ text ("currentGuess: " ++ String.fromInt model.currentGuess) ]
             , div [] [ text ("selectedIndex: " ++ String.fromInt model.selectedIndex) ]
             ]
-        , showColorPicker
-        , showGuesses model
-        , div []
+        , div [ style "margin" "1em" ]
             [ button
                 [ onClick NextGuess ]
                 [ text "Next Turn" ]
@@ -234,12 +230,14 @@ view model =
                 [ onClick NewGame ]
                 [ text "New Game" ]
             ]
+        , showColorPicker
+        , showGuesses model
         ]
 
 
 showGuesses : Model -> Html Msg
 showGuesses model =
-    div [] (List.indexedMap (showIndexedGuess model.currentGuess model.selectedIndex) model.guesses)
+    div [] (List.indexedMap (showIndexedGuess 0 model.selectedIndex) model.guesses)
 
 
 showIndexedGuess : Int -> Int -> Int -> Cypher -> Html Msg
