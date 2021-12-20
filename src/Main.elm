@@ -6,6 +6,8 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import List.Extra exposing (zip)
 import Random
+import Set
+import Tuple exposing (first, second)
 
 
 
@@ -286,9 +288,66 @@ listEqual =
     List.Extra.isPrefixOf
 
 
+pairEqual : ( a, a ) -> Bool
+pairEqual ( a, b ) =
+    a == b
+
+
+pairNotEqual : ( a, a ) -> Bool
+pairNotEqual ( a, b ) =
+    a /= b
+
+
 showGradeGuess : Cypher -> Cypher -> Html Msg
 showGradeGuess secret guess =
-    text "TBD"
+    let
+        z =
+            zip guess secret
+
+        numMatching =
+            List.length (List.filter pairEqual z)
+
+        notMatching =
+            List.unzip (List.filter pairNotEqual z)
+
+        correctColorsOutOfPosition =
+            Set.size
+                (Set.intersect
+                    (Set.fromList (List.map colorText (Tuple.first notMatching)))
+                    (Set.fromList (List.map colorText (Tuple.second notMatching)))
+                )
+    in
+    div
+        [ style "display" "flex"
+        , style "flex-direction" "row"
+        ]
+        (List.append (List.repeat numMatching matchPeg) (List.repeat correctColorsOutOfPosition colorPeg))
+
+
+matchPeg : Html Msg
+matchPeg =
+    div
+        [ style "width" "0.5em"
+        , style "height" "0.5em"
+        , style "border" "2px solid black"
+        , style "border-radius" "0.5em"
+        , style "background" "black"
+        , style "margin" "0.25em"
+        ]
+        []
+
+
+colorPeg : Html Msg
+colorPeg =
+    div
+        [ style "width" "0.5em"
+        , style "height" "0.5em"
+        , style "border" "2px solid black"
+        , style "border-radius" "0.5em"
+        , style "background" "white"
+        , style "margin" "0.25em"
+        ]
+        []
 
 
 showIndexedColor : Bool -> Int -> Int -> Color -> Html Msg
