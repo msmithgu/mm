@@ -227,7 +227,7 @@ view model =
         , style "font-family" "sans-serif"
         , style "font-size" "24px"
         ]
-        [ showSecret model
+        [ showSecret model.reveal model.secret
         , showDebug model
         , div [ style "margin" "1em" ]
             [ button
@@ -239,14 +239,18 @@ view model =
         ]
 
 
-showSecret : Model -> Html Msg
-showSecret model =
-    if model.reveal then
-        div [] (List.map showColor model.secret)
+showSecret : Bool -> Cypher -> Html Msg
+showSecret reveal secret =
+    if reveal then
+        div [] (List.map showColor secret)
 
     else
         div
-            []
+            [ style "display" "flex"
+            , style "flex-direction" "row"
+            , style "justify-content" "space-between"
+            , style "width" "7em"
+            ]
             (List.repeat
                 4
                 (div [ style "display" "inline-block" ] [ text "?" ])
