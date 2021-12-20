@@ -43,7 +43,7 @@ init _ =
       , guesses = []
       , color = Black
       , reveal = False
-      , debug = True
+      , debug = False
       , games = []
       }
     , Cmd.none
