@@ -445,6 +445,7 @@ showPickableColor chosenColor c =
         [ style "display" "inline-block"
         , style "width" size
         , style "height" size
+        , style "cursor" "grab"
         , style "border" "2px solid black"
         , style "border-radius" "1em"
         , style "background" (colorText c)
