@@ -32,12 +32,19 @@ type alias Model =
     { secret : Cypher
     , guesses : List Cypher
     , color : Color
+    , reveal : Bool
+    , debug : Bool
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model blankCypher [ blankCypher ] Black
+    ( { secret = blankCypher
+      , guesses = []
+      , color = Black
+      , reveal = False
+      , debug = False
+      }
     , Cmd.none
     )
 
@@ -109,12 +116,18 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         CheckGuess ->
-            ( { model | guesses = blankCypher :: model.guesses }
-            , Cmd.none
-            )
+            if gameWon model then
+                ( { model | reveal = True }
+                , Cmd.none
+                )
+
+            else
+                ( { model | guesses = blankCypher :: model.guesses }
+                , Cmd.none
+                )
 
         NewGame ->
-            ( { model | guesses = [ blankCypher ] }
+            ( { model | guesses = [ blankCypher ], reveal = False }
             , Random.generate SetSecret (colorListGenerator 4)
             )
 
@@ -132,6 +145,16 @@ update msg model =
             ( { model | guesses = updateGuess model.guesses 0 selectedIndex model.color }
             , Cmd.none
             )
+
+
+gameWon : Model -> Bool
+gameWon model =
+    case model.guesses of
+        [] ->
+            False
+
+        guess :: _ ->
+            List.Extra.isPrefixOf model.secret guess
 
 
 updateGuess : List Cypher -> Int -> Int -> Color -> List Cypher
@@ -204,8 +227,36 @@ view model =
         , style "font-family" "sans-serif"
         ]
         [ h1 [] [ text "MM" ]
-        , div [] (List.map showColor model.secret)
-        , div
+        , showSecret model
+        , showDebug model
+        , div [ style "margin" "1em" ]
+            [ button
+                [ onClick NewGame ]
+                [ text "New Game" ]
+            ]
+        , showColorPalette model.color
+        , showGuesses model
+        ]
+
+
+showSecret : Model -> Html Msg
+showSecret model =
+    if model.reveal then
+        div [] (List.map showColor model.secret)
+
+    else
+        div
+            []
+            (List.repeat
+                4
+                (div [ style "display" "inline-block" ] [ text "?" ])
+            )
+
+
+showDebug : Model -> Html Msg
+showDebug model =
+    if model.debug then
+        div
             [ style "border" "1px dashed #0f0"
             , style "margin" "1em"
             , style "padding" "0.5em 1em"
@@ -216,14 +267,9 @@ view model =
             [ div [] [ text "# debug" ]
             , div [] [ text ("color: " ++ colorText model.color) ]
             ]
-        , div [ style "margin" "1em" ]
-            [ button
-                [ onClick NewGame ]
-                [ text "New Game" ]
-            ]
-        , showColorPalette model.color
-        , showGuesses model
-        ]
+
+    else
+        div [] []
 
 
 showGuesses : Model -> Html Msg
@@ -265,16 +311,18 @@ showIndexedGuess model guessIndex guess =
 
 showGuessStatus : Model -> Int -> Cypher -> Html Msg
 showGuessStatus model guessIndex guess =
-    if guessIndex == 0 then
-        button
-            [ onClick CheckGuess ]
-            [ text "Lock" ]
+    case ( model.reveal, guessIndex ) of
+        ( gameOver, 0 ) ->
+            if gameOver then
+                showGradeGuess model.secret guess
 
-    else if List.Extra.isPrefixOf model.secret guess then
-        text "Correct!"
+            else
+                button
+                    [ onClick CheckGuess ]
+                    [ text "Guess" ]
 
-    else
-        showGradeGuess model.secret guess
+        _ ->
+            showGradeGuess model.secret guess
 
 
 listEqual : List a -> List a -> Bool
