@@ -119,6 +119,7 @@ type Msg
     | SetSecret (List Color)
     | UpdateColor Color
     | UpdateGuessColor Int
+    | UpdateGuess Cypher
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -153,8 +154,13 @@ update msg model =
             , Cmd.none
             )
 
+        UpdateGuess g ->
+            ( { model | guesses = updateGuess model.guesses 0 g }
+            , Cmd.none
+            )
+
         UpdateGuessColor selectedIndex ->
-            ( { model | guesses = updateGuess model.guesses 0 selectedIndex model.color }
+            ( { model | guesses = updateGuessColor model.guesses 0 selectedIndex model.color }
             , Cmd.none
             )
 
@@ -169,8 +175,21 @@ gameWon model =
             List.Extra.isPrefixOf model.secret guess
 
 
-updateGuess : List Cypher -> Int -> Int -> Color -> List Cypher
-updateGuess guessList selectedGuessIndex selectedColorIndex col =
+updateGuess : List Cypher -> Int -> Cypher -> List Cypher
+updateGuess guessList selectedGuessIndex g =
+    let
+        guessUpdate i guess =
+            if i == selectedGuessIndex then
+                g
+
+            else
+                guess
+    in
+    List.indexedMap guessUpdate guessList
+
+
+updateGuessColor : List Cypher -> Int -> Int -> Color -> List Cypher
+updateGuessColor guessList selectedGuessIndex selectedColorIndex col =
     let
         guessUpdate i guess =
             if i == selectedGuessIndex then
@@ -289,6 +308,7 @@ showDebug model =
             , div [] [ text ("best: " ++ String.fromInt (bestScore model)) ]
             , div [] [ text ("avrg: " ++ String.fromInt (averageScore model)) ]
             , div [] [ text ("plyd: " ++ String.fromInt (List.length model.games)) ]
+            , button [ onClick (UpdateGuess model.secret) ] [ text "Cheat" ]
             ]
 
     else
