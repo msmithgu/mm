@@ -7,7 +7,6 @@ import Html.Events exposing (..)
 import List.Extra exposing (zip)
 import Random
 import Set
-import Tuple exposing (first, second)
 
 
 
@@ -33,6 +32,7 @@ type alias Model =
     , guesses : List Cypher
     , color : Color
     , reveal : Bool
+    , games : List Int
     , debug : Bool
     }
 
@@ -43,7 +43,8 @@ init _ =
       , guesses = []
       , color = Black
       , reveal = False
-      , debug = False
+      , debug = True
+      , games = []
       }
     , Cmd.none
     )
@@ -125,7 +126,10 @@ update msg model =
     case msg of
         CheckGuess ->
             if gameWon model then
-                ( { model | reveal = True }
+                ( { model
+                    | reveal = True
+                    , games = List.length model.guesses :: model.games
+                  }
                 , Cmd.none
                 )
 
@@ -278,11 +282,32 @@ showDebug model =
             , style "font-family" "monospace"
             ]
             [ div [] [ text "# debug" ]
+            , div [] [ text "## secret" ]
+            , showSecret True model.secret
             , div [] [ text ("color: " ++ colorText model.color) ]
+            , div [] [ text ("games: " ++ Debug.toString model.games) ]
+            , div [] [ text ("best: " ++ String.fromInt (bestScore model)) ]
+            , div [] [ text ("avrg: " ++ String.fromInt (averageScore model)) ]
+            , div [] [ text ("plyd: " ++ String.fromInt (List.length model.games)) ]
             ]
 
     else
         div [] []
+
+
+bestScore : Model -> Int
+bestScore model =
+    case List.minimum model.games of
+        Nothing ->
+            0
+
+        Just n ->
+            n
+
+
+averageScore : Model -> Int
+averageScore model =
+    List.sum model.games // List.length model.games
 
 
 showGuesses : Model -> Html Msg
