@@ -253,6 +253,7 @@ view model =
         , style "margin" "40px auto"
         , style "padding" "40px"
         , style "display" "flex"
+        , style "position" "relative"
         , style "flex-direction" "column"
         , style "justify-content" "center"
         , style "align-items" "center"
@@ -261,6 +262,7 @@ view model =
         ]
         [ showSecret model.reveal model.secret
         , showDebug model
+        , showScore model.games
         , div [ style "margin" "1em" ]
             [ button
                 [ onClick NewGame ]
@@ -289,6 +291,20 @@ showSecret reveal secret =
             )
 
 
+showScore : List Int -> Html Msg
+showScore gameScores =
+    div
+        [ style "display" "inline-block"
+        , style "position" "absolute"
+        , style "right" "1em"
+        , style "top" "1em"
+        ]
+        [ div [] [ text ("best: " ++ String.fromInt (bestScore gameScores)) ]
+        , div [] [ text ("avrg: " ++ String.fromInt (averageScore gameScores)) ]
+        , div [] [ text ("plyd: " ++ String.fromInt (List.length gameScores)) ]
+        ]
+
+
 showDebug : Model -> Html Msg
 showDebug model =
     if model.debug then
@@ -305,8 +321,8 @@ showDebug model =
             , showSecret True model.secret
             , div [] [ text ("color: " ++ colorText model.color) ]
             , div [] [ text ("games: " ++ Debug.toString model.games) ]
-            , div [] [ text ("best: " ++ String.fromInt (bestScore model)) ]
-            , div [] [ text ("avrg: " ++ String.fromInt (averageScore model)) ]
+            , div [] [ text ("best: " ++ String.fromInt (bestScore model.games)) ]
+            , div [] [ text ("avrg: " ++ String.fromInt (averageScore model.games)) ]
             , div [] [ text ("plyd: " ++ String.fromInt (List.length model.games)) ]
             , button [ onClick (UpdateGuess model.secret) ] [ text "Cheat" ]
             ]
@@ -315,9 +331,9 @@ showDebug model =
         div [] []
 
 
-bestScore : Model -> Int
-bestScore model =
-    case List.minimum model.games of
+bestScore : List Int -> Int
+bestScore gameScores =
+    case List.minimum gameScores of
         Nothing ->
             0
 
@@ -325,9 +341,9 @@ bestScore model =
             n
 
 
-averageScore : Model -> Int
-averageScore model =
-    List.sum model.games // List.length model.games
+averageScore : List Int -> Int
+averageScore gameScores =
+    List.sum gameScores // List.length gameScores
 
 
 showGuesses : Model -> Html Msg
