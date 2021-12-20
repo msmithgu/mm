@@ -225,9 +225,9 @@ view model =
         , style "justify-content" "center"
         , style "align-items" "center"
         , style "font-family" "sans-serif"
+        , style "font-size" "24px"
         ]
-        [ h1 [] [ text "MM" ]
-        , showSecret model
+        [ showSecret model
         , showDebug model
         , div [ style "margin" "1em" ]
             [ button
