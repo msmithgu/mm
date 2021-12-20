@@ -31,13 +31,13 @@ main =
 type alias Model =
     { secret : Cypher
     , guesses : List Cypher
-    , selectedIndex : Int
+    , color : Color
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model blankCypher [ blankCypher ] -1
+    ( Model blankCypher [ blankCypher ] Black
     , Cmd.none
     )
 
@@ -101,8 +101,8 @@ type Msg
     = CheckGuess
     | NewGame
     | SetSecret (List Color)
-    | SelectIndex Int
     | UpdateColor Color
+    | UpdateGuessColor Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -118,18 +118,18 @@ update msg model =
             , Random.generate SetSecret (colorListGenerator 4)
             )
 
-        SetSecret cl ->
-            ( { model | secret = cl }
+        SetSecret s ->
+            ( { model | secret = s }
             , Cmd.none
             )
 
-        SelectIndex i ->
-            ( { model | selectedIndex = i }
+        UpdateColor c ->
+            ( { model | color = c }
             , Cmd.none
             )
 
-        UpdateColor col ->
-            ( { model | selectedIndex = -1, guesses = updateGuess model.guesses 0 model.selectedIndex col }
+        UpdateGuessColor selectedIndex ->
+            ( { model | guesses = updateGuess model.guesses 0 selectedIndex model.color }
             , Cmd.none
             )
 
@@ -214,14 +214,14 @@ view model =
             , style "font-family" "monospace"
             ]
             [ div [] [ text "# debug" ]
-            , div [] [ text ("selectedIndex: " ++ String.fromInt model.selectedIndex) ]
+            , div [] [ text ("color: " ++ colorText model.color) ]
             ]
         , div [ style "margin" "1em" ]
             [ button
                 [ onClick NewGame ]
                 [ text "New Game" ]
             ]
-        , showColorPicker
+        , showColorPalette model.color
         , showGuesses model
         ]
 
@@ -254,12 +254,6 @@ showIndexedGuess model guessIndex guess =
             (List.indexedMap
                 (showIndexedColor
                     (guessIndex == 0)
-                    (if guessIndex == 0 then
-                        model.selectedIndex
-
-                     else
-                        -1
-                    )
                 )
                 guess
             )
@@ -350,19 +344,10 @@ colorPeg =
         []
 
 
-showIndexedColor : Bool -> Int -> Int -> Color -> Html Msg
-showIndexedColor clickable selectedIndex i c =
+showIndexedColor : Bool -> Int -> Color -> Html Msg
+showIndexedColor clickable i c =
     div
         [ style "display" "inline-block"
-        , style "position" "relative"
-        , style "border" "1px solid transparent"
-        , style "border-color"
-            (if i == selectedIndex then
-                "black"
-
-             else
-                "transparent"
-            )
         , style "text-align" "center"
         , style "cursor"
             (if clickable then
@@ -372,7 +357,7 @@ showIndexedColor clickable selectedIndex i c =
                 "inherit"
             )
         , if clickable then
-            onClick (SelectIndex i)
+            onClick (UpdateGuessColor i)
 
           else
             style "opacity" "0.5"
@@ -394,26 +379,40 @@ showColor c =
         []
 
 
-showPickableColor : Color -> Html Msg
-showPickableColor c =
+showPickableColor : Color -> Color -> Html Msg
+showPickableColor chosenColor c =
+    let
+        size =
+            if c == chosenColor then
+                "1.75em"
+
+            else
+                "1.25em"
+    in
     div
         [ style "display" "inline-block"
-        , style "width" "1.25em"
-        , style "height" "1.25em"
+        , style "width" size
+        , style "height" size
         , style "border" "2px solid black"
         , style "border-radius" "1em"
         , style "background" (colorText c)
-        , style "margin" "0.5em"
+        , style "margin"
+            (if c == chosenColor then
+                "0.25em"
+
+             else
+                "0.5em"
+            )
         , onClick (UpdateColor c)
         ]
         []
 
 
-showColorPicker : Html Msg
-showColorPicker =
+showColorPalette : Color -> Html Msg
+showColorPalette chosenColor =
     div
         [ style "display" "block"
         , style "border" "1px solid black"
         , style "margin-bottom" "1em"
         ]
-        (List.map showPickableColor allColors)
+        (List.map (showPickableColor chosenColor) allColors)
