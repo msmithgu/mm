@@ -54,10 +54,10 @@ blankCypher =
     List.repeat 4 White
 
 
-allColors : List Color
-allColors =
-    [ White
-    , Black
+choosableColors : List Color
+choosableColors =
+    [ Purple
+    , Pink
     , Red
     , Green
     , Blue
@@ -66,12 +66,14 @@ allColors =
 
 
 type Color
-    = Red
+    = White
+    | Black
+    | Purple
+    | Pink
+    | Red
     | Green
     | Blue
     | Yellow
-    | White
-    | Black
 
 
 type alias Cypher =
@@ -81,6 +83,12 @@ type alias Cypher =
 colorText : Color -> String
 colorText c =
     case c of
+        Purple ->
+            "purple"
+
+        Pink ->
+            "pink"
+
         Red ->
             "red"
 
@@ -190,8 +198,9 @@ colorListGenerator n =
 
 colorGenerator : Random.Generator Color
 colorGenerator =
-    Random.uniform White
-        [ Black
+    Random.uniform
+        Purple
+        [ Pink
         , Red
         , Green
         , Blue
@@ -468,4 +477,4 @@ showColorPalette chosenColor =
         , style "border" "1px solid black"
         , style "margin-bottom" "1em"
         ]
-        (List.map (showPickableColor chosenColor) allColors)
+        (List.map (showPickableColor chosenColor) choosableColors)
