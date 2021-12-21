@@ -195,11 +195,21 @@ gradeGuess secret guess =
         ( unmatchedGuessElements, unmatchedSecretElements ) =
             List.unzip (List.filter pairNotEqual z)
 
+        ges =
+            List.map colorText unmatchedGuessElements
+
+        ses =
+            List.map colorText unmatchedSecretElements
+
         correctColorsOutOfPosition =
-            List.length
-                (intersect
-                    (List.map colorText unmatchedGuessElements)
-                    (List.map colorText unmatchedSecretElements)
+            Maybe.withDefault 0
+                (List.minimum
+                    -- FIXME: there must be a better way
+                    [ List.length
+                        (intersect ses ges)
+                    , List.length
+                        (intersect ges ses)
+                    ]
                 )
     in
     ( numMatching, correctColorsOutOfPosition )
