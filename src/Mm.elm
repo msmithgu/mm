@@ -1,8 +1,7 @@
 module Mm exposing (..)
 
-import List.Extra exposing (zip)
+import List.Extra
 import Random
-import Set
 
 
 
@@ -188,7 +187,7 @@ gradeGuess : Cypher -> Cypher -> ( Int, Int )
 gradeGuess secret guess =
     let
         z =
-            zip guess secret
+            List.Extra.zip guess secret
 
         numMatching =
             List.length (List.filter pairEqual z)

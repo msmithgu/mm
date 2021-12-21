@@ -4,7 +4,6 @@ import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import List.Extra exposing (zip)
 import Mm exposing (..)
 import Random
 
