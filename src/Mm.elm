@@ -147,6 +147,11 @@ listEqual =
     List.Extra.isPrefixOf
 
 
+equal : a -> a -> Bool
+equal a b =
+    a == b
+
+
 pairEqual : ( a, a ) -> Bool
 pairEqual ( a, b ) =
     a == b
@@ -155,6 +160,28 @@ pairEqual ( a, b ) =
 pairNotEqual : ( a, a ) -> Bool
 pairNotEqual ( a, b ) =
     a /= b
+
+
+intersectBy : (a -> a -> Bool) -> List a -> List a -> List a
+intersectBy comp xs ys =
+    let
+        checkMember zs m =
+            List.any (comp m) zs
+    in
+    case ( comp, xs, ys ) of
+        ( _, [], _ ) ->
+            []
+
+        ( _, _, [] ) ->
+            []
+
+        _ ->
+            List.filter (checkMember ys) xs
+
+
+intersect : List a -> List a -> List a
+intersect =
+    intersectBy equal
 
 
 gradeGuess : Cypher -> Cypher -> ( Int, Int )
@@ -166,14 +193,14 @@ gradeGuess secret guess =
         numMatching =
             List.length (List.filter pairEqual z)
 
-        notMatching =
+        ( unmatchedGuessElements, unmatchedSecretElements ) =
             List.unzip (List.filter pairNotEqual z)
 
         correctColorsOutOfPosition =
-            Set.size
-                (Set.intersect
-                    (Set.fromList (List.map colorText (Tuple.first notMatching)))
-                    (Set.fromList (List.map colorText (Tuple.second notMatching)))
+            List.length
+                (intersect
+                    (List.map colorText unmatchedGuessElements)
+                    (List.map colorText unmatchedSecretElements)
                 )
     in
     ( numMatching, correctColorsOutOfPosition )
