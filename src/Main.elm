@@ -168,10 +168,11 @@ showScore gameScores =
         , style "position" "absolute"
         , style "right" "1em"
         , style "top" "1em"
+        , style "font-size" "0.8em"
         ]
         [ div [] [ text ("best: " ++ String.fromInt (bestScore gameScores)) ]
-        , div [] [ text ("avrg: " ++ String.fromInt (averageScore gameScores)) ]
-        , div [] [ text ("plyd: " ++ String.fromInt (List.length gameScores)) ]
+        , div [] [ text ("average: " ++ String.fromInt (averageScore gameScores)) ]
+        , div [] [ text ("played: " ++ String.fromInt (List.length gameScores)) ]
         ]
 
 
