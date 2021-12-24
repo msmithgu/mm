@@ -67,6 +67,37 @@ colorText c =
             "black"
 
 
+textToColor : String -> Color
+textToColor c =
+    case c of
+        "purple" ->
+            Purple
+
+        "pink" ->
+            Pink
+
+        "red" ->
+            Red
+
+        "green" ->
+            Green
+
+        "blue" ->
+            Blue
+
+        "yellow" ->
+            Yellow
+
+        "white" ->
+            White
+
+        "black" ->
+            Black
+
+        _ ->
+            White
+
+
 
 -- UPDATE
 
@@ -161,33 +192,63 @@ pairNotEqual ( a, b ) =
     a /= b
 
 
-intersectBy : (a -> a -> Bool) -> List a -> List a -> List a
-intersectBy comp xs ys =
+sortColors : List Color -> List Color
+sortColors colors =
+    colors
+        |> List.map colorText
+        |> List.sort
+        |> List.map textToColor
+
+
+colorReps : List Color -> List ( Color, Int )
+colorReps colors =
+    colors
+        |> sortColors
+        |> List.Extra.group
+        |> List.map
+            (\( c, reps ) ->
+                ( c, 1 + List.length reps )
+            )
+
+
+repsToList : ( a, Int ) -> List a
+repsToList ( foo, n ) =
+    List.repeat n foo
+
+
+matchMinRep : ( a, Int ) -> ( a, Int ) -> ( a, Int )
+matchMinRep ( v1, r1 ) ( v2, r2 ) =
+    if v1 == v2 then
+        if r1 < r2 then
+            ( v1, r1 )
+
+        else
+            ( v1, r2 )
+
+    else
+        ( v1, 0 )
+
+
+intersectColors : List Color -> List Color -> List Color
+intersectColors a b =
     let
-        checkMember zs m =
-            List.any (comp m) zs
+        aReps =
+            colorReps a
+
+        bReps =
+            colorReps b
     in
-    case ( comp, xs, ys ) of
-        ( _, [], _ ) ->
-            []
-
-        ( _, _, [] ) ->
-            []
-
-        _ ->
-            List.filter (checkMember ys) xs
-
-
-intersect : List a -> List a -> List a
-intersect =
-    intersectBy equal
+    aReps
+        |> List.concatMap (\rep -> List.map (matchMinRep rep) bReps)
+        |> List.concatMap repsToList
+        |> List.foldl (::) []
 
 
 gradeGuess : Cypher -> Cypher -> ( Int, Int )
 gradeGuess secret guess =
     let
         z =
-            List.Extra.zip guess secret
+            List.Extra.zip (List.map colorText guess) (List.map colorText secret)
 
         numMatching =
             List.length (List.filter pairEqual z)
@@ -195,21 +256,11 @@ gradeGuess secret guess =
         ( unmatchedGuessElements, unmatchedSecretElements ) =
             List.unzip (List.filter pairNotEqual z)
 
-        ges =
-            List.map colorText unmatchedGuessElements
-
-        ses =
-            List.map colorText unmatchedSecretElements
-
         correctColorsOutOfPosition =
-            Maybe.withDefault 0
-                (List.minimum
-                    -- FIXME: there must be a better way
-                    [ List.length
-                        (intersect ses ges)
-                    , List.length
-                        (intersect ges ses)
-                    ]
+            List.length
+                (intersectColors
+                    (List.map textToColor unmatchedGuessElements)
+                    (List.map textToColor unmatchedSecretElements)
                 )
     in
     ( numMatching, correctColorsOutOfPosition )
