@@ -74,5 +74,21 @@ suite =
                             [ Yellow, Yellow, Pink, Pink ]
                             [ Pink, Yellow, Purple, Purple ]
                         )
+            , test "grades Mark's late night case correctly" <|
+                \_ ->
+                    Expect.equal
+                        ( 1, 2 )
+                        (gradeGuess
+                            [ Green, Red, Yellow, Yellow ]
+                            [ Red, Green, Yellow, Green ]
+                        )
+            , test "grades Trader Joe case correctly" <|
+                \_ ->
+                    Expect.equal
+                        (gradeGuess
+                            [ Red, Green, Red, Red ]
+                            [ Red, Red, Green, Green ]
+                        )
+                        ( 1, 2 )
             ]
         ]
