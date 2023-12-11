@@ -193,7 +193,7 @@ showDebug model =
             , div [] [ text "## secret" ]
             , showSecret True model.secret
             , div [] [ text ("color: " ++ colorText model.color) ]
-            , div [] [ text ("games: " ++ Debug.toString model.games) ]
+            -- , div [] [ text ("games: " ++ Debug.toString model.games) ]
             , div [] [ text ("best: " ++ String.fromInt (bestScore model.games)) ]
             , div [] [ text ("avrg: " ++ String.fromInt (averageScore model.games)) ]
             , div [] [ text ("plyd: " ++ String.fromInt (List.length model.games)) ]
