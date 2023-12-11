@@ -36,7 +36,7 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( { secret = blankCypher
       , guesses = []
-      , color = White
+      , color = Purple
       , reveal = False
       , debug = False
       , games = []
