@@ -117,25 +117,28 @@ subscriptions _ =
 view : Model -> Html Msg
 view model =
     div
-        [ style "border" "6px dashed purple"
-        , style "border-radius" "20px"
-        , style "width" "480px"
-        , style "margin" "40px auto"
-        , style "padding" "40px"
+        [ style "border" "1vw dashed purple"
+        , style "border-radius" "3vw"
+        , style "width" "calc(100% - 92px)"
+        , style "max-width" "1024px"
+        , style "min-width" "360px"
+        , style "margin" "3vw auto"
+        , style "padding" "3vw"
         , style "display" "flex"
         , style "position" "relative"
         , style "flex-direction" "column"
         , style "justify-content" "center"
         , style "align-items" "center"
         , style "font-family" "sans-serif"
-        , style "font-size" "24px"
+        , style "font-size" "min(4vw, 36px)"
         ]
         [ showSecret model.reveal model.secret
         , showDebug model
         , showScore model.games
         , div [ style "margin" "1em" ]
             [ button
-                [ onClick NewGame ]
+                [ onClick NewGame
+                , style "font-size" "inherit" ]
                 [ text "New Game" ]
             ]
         , showColorPalette model.color
@@ -168,7 +171,6 @@ showScore gameScores =
         , style "position" "absolute"
         , style "right" "1em"
         , style "top" "1em"
-        , style "font-size" "0.8em"
         ]
         [ div [] [ text ("best: " ++ String.fromInt (bestScore gameScores)) ]
         , div [] [ text ("average: " ++ String.fromInt (averageScore gameScores)) ]
@@ -195,7 +197,11 @@ showDebug model =
             , div [] [ text ("best: " ++ String.fromInt (bestScore model.games)) ]
             , div [] [ text ("avrg: " ++ String.fromInt (averageScore model.games)) ]
             , div [] [ text ("plyd: " ++ String.fromInt (List.length model.games)) ]
-            , button [ onClick (UpdateGuess model.secret) ] [ text "Cheat" ]
+            , button
+                [ onClick (UpdateGuess model.secret)
+                , style "font-size" "inherit"
+                ]
+                [ text "Cheat" ]
             ]
 
     else
@@ -263,7 +269,8 @@ showGuessStatus model guessIndex guess =
 
             else
                 button
-                    [ onClick CheckGuess ]
+                    [ onClick CheckGuess
+                    , style "font-size" ".8em"]
                     [ text "Guess" ]
 
         _ ->
