@@ -227,7 +227,9 @@ showIndexedGuess model guessIndex guess =
         , style "flex-direction" "row"
         ]
         [ div
-            [ style "margin" "0.5em" ]
+            [ style "margin" "0.5em"
+            , onClick (UpdateGuess guess)
+            ]
             [ text (String.fromInt (List.length model.guesses - guessIndex)) ]
         , div
             [ style "border-left" "4px solid transparent"
